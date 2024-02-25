@@ -184,7 +184,6 @@ export default class SliderContainer extends LightningElement {
 
     handleMouseDown(event) {
         if (this.slideSwitcher) {
-            console.log('mouse down')
             event.preventDefault();
             event.stopPropagation();
             this.touchStartTime = Date.parse(new Date)

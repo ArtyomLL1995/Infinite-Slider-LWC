@@ -6,7 +6,7 @@
     background-color: white;
 }
 
-button {
+lightning-icon {
     position: absolute;
     top: 50%; 
     transform: translate(0, -50%);
