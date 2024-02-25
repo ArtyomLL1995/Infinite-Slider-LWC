@@ -1,0 +1,13 @@
+<template>
+    <div class="wrapper">
+        <div class="slide-container" for:each={currentlyDisplayedContent} for:item="item" key={item.src}>
+            <!-- You can put any content inside 'slide-container' -->
+            <div style="width: 100%; height: 100%; border: 1px solid grey">
+                <img src={item.src} alt={item.src} style="width: 100%; height: 100%; object-fit:contain">
+            </div>
+            <!-- You can put any content inside 'slide-container' -->
+        </div>
+        <button class="next" onclick={slideNext}>next</button>
+        <button class="prev" onclick={slidePrev}>prev</button>
+    </div>
+</template>
