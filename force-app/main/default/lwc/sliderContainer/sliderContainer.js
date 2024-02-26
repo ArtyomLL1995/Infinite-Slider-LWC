@@ -18,20 +18,22 @@ export default class SliderContainer extends LightningElement {
 
     // Initial contstants---------------------------
 
+    infiniteSlider = false
+
     // If false then you can move slider with the mouse or trackpad
     @api disableMouseMove = false
 
     // Frame width in UNIT
-    @api sliderContainerWidth = 100 
+    @api sliderContainerWidth = 100
 
     // Frame height in HEIGHT_UNIT
     @api sliderContainerHeight = 300 
 
     // Number of visible pictures in frame
-    @api amountOfPicturesInSlide = 3 
+    @api amountOfPicturesInSlide = 2 
 
     // Amount of scrolled pictures per one slide. (amountOfPicturesInSlide + amountOfSlidesPerSlide*2) should not be greater than the whole number of images
-    @api amountOfSlidesPerSlide = 2 
+    @api amountOfSlidesPerSlide = 1 
 
     // Scroll speed in ms
     @api speed = 400 
@@ -74,6 +76,7 @@ export default class SliderContainer extends LightningElement {
     indexNext
     indexPrev
     marginLeft
+    marginLeftOffset = 0
     touchStartTime
     touchEndTime
     mouseRelativePosition = 0
@@ -98,7 +101,7 @@ export default class SliderContainer extends LightningElement {
             this.firstRender = false
             this.wrapper = this.template.querySelector('.wrapper')
             this.wrapper.style.width = this.sliderContainerWidth + UNIT
-            if (this.disableMouseMove) {
+            if (!this.disableMouseMove) {
                 this.wrapper.addEventListener('mousedown', this.handleMouseDown.bind(this))
                 this.wrapper.addEventListener('mousemove', this.handleMouseMove.bind(this))
                 this.wrapper.addEventListener('mouseup', this.handleMouseUp.bind(this))
@@ -108,10 +111,10 @@ export default class SliderContainer extends LightningElement {
     }
 
     defineInitialDisplayedContent() {
-        let index = this.indexNext
+        let index = this.infiniteSlider ? this.indexNext : 0
         for (let i = 0; i < this.numberOfInitialDrownSlides; i++) {
             if (index === this.allAvailableContent.length) index = 0
-            this.currentlyDisplayedContent.push({id : i, src : this.allAvailableContent[index]})
+            this.currentlyDisplayedContent.push({src : this.allAvailableContent[index]})
             index++
         }
     }
@@ -137,33 +140,73 @@ export default class SliderContainer extends LightningElement {
 
     slideNext() {
         if (this.slideSwitcher) {
-            this.changeFirstSlideStyle('0' + UNIT)
-            setTimeout(() => {
-                for (let i = 0; i < this.amountOfSlidesPerSlide; i++) {
-                    this.indexNext -= 1
-                    this.indexPrev -= 1
-                    if (this.indexNext < 0) this.indexNext = this.allAvailableContent.length - 1
-                    if (this.indexPrev < 0) this.indexPrev = this.allAvailableContent.length - 1
-                    this.currentlyDisplayedContent.unshift({id :this.indexNext, src : this.allAvailableContent[this.indexNext]})
-                    this.currentlyDisplayedContent.pop()
+            if (this.infiniteSlider) {
+                this.changeFirstSlideStyle('0' + UNIT)
+                setTimeout(() => {
+                    for (let i = 0; i < this.amountOfSlidesPerSlide; i++) {
+                        this.indexNext -= 1
+                        this.indexPrev -= 1
+                        if (this.indexNext < 0) this.indexNext = this.allAvailableContent.length - 1
+                        if (this.indexPrev < 0) this.indexPrev = this.allAvailableContent.length - 1
+                        this.currentlyDisplayedContent.unshift({src : this.allAvailableContent[this.indexNext]})
+                        this.currentlyDisplayedContent.pop()
+                    }
+                }, this.speed)
+            } else {
+                if (Math.floor(this.marginLeftOffset) < 0) {
+                    this.changeFirstSlideStyle((this.marginLeftOffset + (this.imgWidth * this.amountOfSlidesPerSlide)) + UNIT)
+                    this.marginLeftOffset += this.imgWidth * this.amountOfSlidesPerSlide
+                } else if (Math.floor(this.marginLeftOffset) === 0) {
+                    this.changeFirstSlideStyle(0 + UNIT)
                 }
-            }, this.speed)
+                setTimeout(() => {
+                    this.slideSwitcher = true
+                }, this.speed)
+            }
         }
     }
 
     slidePrev() {
         if (this.slideSwitcher) {
-            this.changeFirstSlideStyle(-this.imgWidth * (2 * this.amountOfSlidesPerSlide) + UNIT)
-            setTimeout(() => {
-                for (let i = 0; i < this.amountOfSlidesPerSlide; i++) {
-                    if (this.indexPrev > this.allAvailableContent.length - 1) this.indexPrev = 0
-                    if (this.indexNext > this.allAvailableContent.length - 1) this.indexNext = 0
-                    this.currentlyDisplayedContent.push({id :this.indexPrev, src : this.allAvailableContent[this.indexPrev]})
-                    this.currentlyDisplayedContent.shift()
-                    this.indexPrev += 1
-                    this.indexNext += 1
+            if (this.infiniteSlider) {
+                this.changeFirstSlideStyle(-this.imgWidth * (2 * this.amountOfSlidesPerSlide) + UNIT)
+                setTimeout(() => {
+                    for (let i = 0; i < this.amountOfSlidesPerSlide; i++) {
+                        if (this.indexPrev > this.allAvailableContent.length - 1) this.indexPrev = 0
+                        if (this.indexNext > this.allAvailableContent.length - 1) this.indexNext = 0
+                        this.currentlyDisplayedContent.push({src : this.allAvailableContent[this.indexPrev]})
+                        this.currentlyDisplayedContent.shift()
+                        this.indexPrev += 1
+                        this.indexNext += 1
+                    }
+                }, this.speed)
+            } else {
+                if (Math.floor(this.marginLeftOffset) <= 0 && 
+                    Math.abs(this.marginLeftOffset) < 
+                    Math.abs(this.imgWidth * this.allAvailableContent.length) - 
+                    Math.abs(this.imgWidth * this.amountOfPicturesInSlide)) {
+                    
+                    this.changeFirstSlideStyle(this.marginLeftOffset - (this.imgWidth * this.amountOfSlidesPerSlide) + UNIT)
+                    setTimeout(() => {
+                        this.marginLeftOffset -= this.imgWidth * this.amountOfSlidesPerSlide
+                        const newSlides = []
+                        for (let i = this.currentlyDisplayedContent.length; 
+                            i < this.currentlyDisplayedContent.length + this.amountOfSlidesPerSlide; i++) {
+
+                            if (this.allAvailableContent[i]) {
+                                newSlides.push({src : this.allAvailableContent[i]})
+                            }
+                        }
+                        this.currentlyDisplayedContent = [...this.currentlyDisplayedContent, ...newSlides]
+                        this.slideSwitcher = true
+                    }, this.speed)
+                } else {
+                    setTimeout(() => {
+                        this.slideSwitcher = true
+                    }, this.speed)
+                    this.changeFirstSlideStyle(this.marginLeftOffset + UNIT)
                 }
-            }, this.speed)
+            }
         }
     }
 
@@ -173,10 +216,12 @@ export default class SliderContainer extends LightningElement {
             renderedItems[i].style.width = this.imgWidth + UNIT
             renderedItems[i].style.height = this.sliderContainerHeight + HEIGHT_UNIT
             renderedItems[i].style.transition = 0 + 's'
-            if (i === 0) {
-                renderedItems[i].style.marginLeft = -this.imgWidth * this.amountOfSlidesPerSlide + UNIT
-            } else {
-                renderedItems[i].style.marginLeft = 0 + UNIT
+            if (this.infiniteSlider) {
+                if (i === 0) {
+                    renderedItems[i].style.marginLeft = -this.imgWidth * this.amountOfSlidesPerSlide + UNIT
+                } else {
+                    renderedItems[i].style.marginLeft = 0 + UNIT
+                }
             }
         }
         this.slideSwitcher = true
@@ -239,4 +284,5 @@ export default class SliderContainer extends LightningElement {
             }
         }
     }
+
 }

@@ -1,13 +1,18 @@
 <template>
     <div class="wrapper">
+        <!-- For the slider to work correctly make sure that key is unique -->
         <div class="slide-container" for:each={currentlyDisplayedContent} for:item="item" key={item.src}>
+
             <!-- You can put any content inside 'slide-container' -->
+
             <div style="width: 100%; height: 100%; border: 1px solid grey">
                 <img src={item.src} alt={item.src} style="width: 100%; height: 100%; object-fit:contain">
             </div>
+
             <!-- You can put any content inside 'slide-container' -->
+
         </div>
-        <lightning-icon icon-name="utility:right" class="next" onclick={slideNext}></lightning-icon>
-        <lightning-icon icon-name="utility:left" class="prev" onclick={slidePrev}></lightning-icon>
+        <lightning-icon icon-name="utility:right" class="next" onclick={slidePrev}></lightning-icon>
+        <lightning-icon icon-name="utility:left" class="prev" onclick={slideNext}></lightning-icon>
     </div>
 </template>
