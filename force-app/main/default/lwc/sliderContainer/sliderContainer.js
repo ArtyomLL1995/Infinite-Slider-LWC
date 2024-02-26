@@ -11,29 +11,36 @@ import IMAGE_8 from '@salesforce/resourceUrl/image8';
 import IMAGE_9 from '@salesforce/resourceUrl/image9';
 import IMAGE_10 from '@salesforce/resourceUrl/image10';
 
-const UNIT = '%'
-const HEIGHT_UNIT = 'px'
+const UNIT = '%' // Supports '%', 'px', 'rem', 'em'
+const HEIGHT_UNIT = 'px' // Supports 'px', 'rem', 'em'
 
 export default class SliderContainer extends LightningElement {
 
+
+    allAvailableContent = [ IMAGE_1, IMAGE_2, IMAGE_3, IMAGE_4, IMAGE_5, IMAGE_6, IMAGE_7, IMAGE_8, IMAGE_9, IMAGE_10 ]
+
+    @track currentlyDisplayedContent = []
+
+
     // Initial contstants---------------------------
 
-    infiniteSlider = false
+    infiniteSlider = true
 
     // If false then you can move slider with the mouse or trackpad
     @api disableMouseMove = false
 
-    // Frame width in UNIT
+    // Whole slider width in UNIT
     @api sliderContainerWidth = 100
 
-    // Frame height in HEIGHT_UNIT
-    @api sliderContainerHeight = 300 
+    // Whole slider height in HEIGHT_UNIT
+    @api sliderContainerHeight = 300
 
-    // Number of visible pictures in frame
-    @api amountOfPicturesInSlide = 2 
+    // Number of visible slides in frame
+    @api amountOfSlidesInFrame = 3
 
-    // Amount of scrolled pictures per one slide. (amountOfPicturesInSlide + amountOfSlidesPerSlide*2) should not be greater than the whole number of images
-    @api amountOfSlidesPerSlide = 1 
+    // Amount of scrolled slides per one slide. 
+    // (amountOfSlidesInFrame + amountOfSlidesPerSlide*2) must not be greater than the whole number of images
+    @api amountOfSlidesPerSlide = 2
 
     // Scroll speed in ms
     @api speed = 400 
@@ -49,28 +56,12 @@ export default class SliderContainer extends LightningElement {
 
     // Html elem---------------------------
 
-    allAvailableContent = [
-        IMAGE_1,
-        IMAGE_2,
-        IMAGE_3, 
-        IMAGE_4, 
-        IMAGE_5,
-        IMAGE_6,
-        IMAGE_7,
-        IMAGE_8,
-        IMAGE_9,
-        IMAGE_10
-    ]
-
-    @track currentlyDisplayedContent = []
-
     // Animation variables---------------------------
 
     showSlider = false
     mouseClickedOnTheElement = false
     firstRender = true
     slideSwitcher = true
-    
     numberOfInitialDrownSlides
     imgWidth
     indexNext
@@ -120,14 +111,14 @@ export default class SliderContainer extends LightningElement {
     }
 
     applyInitialVariables() {
-        this.numberOfInitialDrownSlides = this.amountOfPicturesInSlide + (this.amountOfSlidesPerSlide * 2)
+        this.numberOfInitialDrownSlides = this.amountOfSlidesInFrame + (this.amountOfSlidesPerSlide * 2)
         if (UNIT != '%') {
-            this.imgWidth = this.sliderContainerWidth / this.amountOfPicturesInSlide
+            this.imgWidth = this.sliderContainerWidth / this.amountOfSlidesInFrame
         } else {
-            this.imgWidth = 100 / this.amountOfPicturesInSlide
+            this.imgWidth = 100 / this.amountOfSlidesInFrame
         }
         this.indexNext = this.allAvailableContent.length - this.amountOfSlidesPerSlide
-        this.indexPrev = this.amountOfPicturesInSlide + this.amountOfSlidesPerSlide
+        this.indexPrev = this.amountOfSlidesInFrame + this.amountOfSlidesPerSlide
     }
 
     changeFirstSlideStyle(left) {
@@ -184,9 +175,10 @@ export default class SliderContainer extends LightningElement {
                 if (Math.floor(this.marginLeftOffset) <= 0 && 
                     Math.abs(this.marginLeftOffset) < 
                     Math.abs(this.imgWidth * this.allAvailableContent.length) - 
-                    Math.abs(this.imgWidth * this.amountOfPicturesInSlide)) {
+                    Math.abs(this.imgWidth * this.amountOfSlidesInFrame)) {
                     
                     this.changeFirstSlideStyle(this.marginLeftOffset - (this.imgWidth * this.amountOfSlidesPerSlide) + UNIT)
+
                     setTimeout(() => {
                         this.marginLeftOffset -= this.imgWidth * this.amountOfSlidesPerSlide
                         const newSlides = []
@@ -200,11 +192,12 @@ export default class SliderContainer extends LightningElement {
                         this.currentlyDisplayedContent = [...this.currentlyDisplayedContent, ...newSlides]
                         this.slideSwitcher = true
                     }, this.speed)
+
                 } else {
+                    this.changeFirstSlideStyle(this.marginLeftOffset + UNIT)
                     setTimeout(() => {
                         this.slideSwitcher = true
                     }, this.speed)
-                    this.changeFirstSlideStyle(this.marginLeftOffset + UNIT)
                 }
             }
         }
@@ -228,9 +221,9 @@ export default class SliderContainer extends LightningElement {
     }
 
     handleMouseDown(event) {
+        event.preventDefault();
+        event.stopPropagation();
         if (this.slideSwitcher) {
-            event.preventDefault();
-            event.stopPropagation();
             this.touchStartTime = Date.parse(new Date)
             const renderedItems = this.template.querySelectorAll('.slide-container')
             renderedItems[0].style.transition = 0 + 'ms'
@@ -242,9 +235,9 @@ export default class SliderContainer extends LightningElement {
     }
 
     handleMouseMove(event) {
+        event.preventDefault();
+        event.stopPropagation();
         if (this.slideSwitcher) {
-            event.preventDefault();
-            event.stopPropagation();
             if (this.mouseClickedOnTheElement) {
                 this.currentCoords.x = event.pageX
                 this.mouseRelativePosition = parseInt(this.currentCoords.x) - parseInt(this.initialCoords.x)
@@ -255,9 +248,9 @@ export default class SliderContainer extends LightningElement {
     }
 
     handleMouseUp(event) {
+        event.preventDefault();
+        event.stopPropagation();
         if (this.slideSwitcher) {
-            event.preventDefault();
-            event.stopPropagation();
             this.touchEndTime = Date.parse(new Date)
             if (this.mouseClickedOnTheElement) {
                 if (this.mouseRelativePosition > 0) {
