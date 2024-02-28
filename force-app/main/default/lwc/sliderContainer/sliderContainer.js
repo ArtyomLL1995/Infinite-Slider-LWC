@@ -11,74 +11,84 @@ import IMAGE_8 from '@salesforce/resourceUrl/image8';
 import IMAGE_9 from '@salesforce/resourceUrl/image9';
 import IMAGE_10 from '@salesforce/resourceUrl/image10';
 
-const UNIT = '%' // Supports '%', 'px', 'rem', 'em'
-const HEIGHT_UNIT = 'px' // Supports 'px', 'rem', 'em'
+// Slider width unit. Supports '%', 'px', 'rem', 'em', 'vw' (other units not tested)
+const UNIT = '%' 
+
+// Slider height unit. Supports 'px', 'rem', 'em', 'vh' (other units not tested)
+const HEIGHT_UNIT = 'px'
 
 export default class SliderContainer extends LightningElement {
 
-
+    // Store here all data about slides (img.src or other info)
     allAvailableContent = [ IMAGE_1, IMAGE_2, IMAGE_3, IMAGE_4, IMAGE_5, IMAGE_6, IMAGE_7, IMAGE_8, IMAGE_9, IMAGE_10 ]
 
+    // Here we store currently displayed slides that we take from this.allAvailableContent
     @track currentlyDisplayedContent = []
 
 
-    // Initial contstants---------------------------
 
-    infiniteSlider = true
+    // Initial constants---------------------------
 
-    // If false then you can move slider with the mouse or trackpad
-    @api disableMouseMove = false
+        // If true then slider is infinite
+        infiniteSlider = true
 
-    // Whole slider width in UNIT
-    @api sliderContainerWidth = 100
+        // If false then you can move slider with the mouse or trackpad
+        @api disableMouseMove = false
 
-    // Whole slider height in HEIGHT_UNIT
-    @api sliderContainerHeight = 300
+        // Slider width in UNIT
+        @api sliderContainerWidth = 100
 
-    // Number of visible slides in frame
-    @api amountOfSlidesInFrame = 3
+        // Slider height in HEIGHT_UNIT
+        @api sliderContainerHeight = 300
 
-    // Amount of scrolled slides per one slide. 
-    // (amountOfSlidesInFrame + amountOfSlidesPerSlide*2) must not be greater than the whole number of images
-    @api amountOfSlidesPerSlide = 2
+        // Number of visible slides in frame
+        @api amountOfSlidesInFrame = 3
 
-    // Scroll speed in ms
-    @api speed = 400 
+        // Amount of scrolled slides per one slide. 
+        // (amountOfSlidesInFrame + amountOfSlidesPerSlide*2) must not be greater than allAvailableContent.length
+        @api amountOfSlidesPerSlide = 2
 
-    // Transition function
-    @api transitionTimingFunction = 'cubic-bezier(0, 0, 0.58, 1.0)'
+        // Scroll speed in ms
+        @api speed = 400 
 
-    // Initial contstants---------------------------
+        // Transition function
+        @api transitionTimingFunction = 'cubic-bezier(0, 0, 0.58, 1.0)'
+
+    // Initial constants---------------------------
+
+
 
     // Html elem---------------------------
 
-    wrapper
+        wrapper
 
     // Html elem---------------------------
+
+    
 
     // Animation variables---------------------------
 
-    showSlider = false
-    mouseClickedOnTheElement = false
-    firstRender = true
-    slideSwitcher = true
-    numberOfInitialDrownSlides
-    imgWidth
-    indexNext
-    indexPrev
-    marginLeft
-    marginLeftOffset = 0
-    touchStartTime
-    touchEndTime
-    mouseRelativePosition = 0
-    
-    initialCoords = {
-        x : 0
-    }
+        showSlider = false
+        mouseClickedOnTheElement = false
+        firstRender = true
+        slideSwitcher = true
+        numberOfInitialDrownSlides
+        imgWidth
+        indexNext
+        indexPrev
+        marginLeft
+        marginLeftOffset = 0
+        touchStartTime
+        touchEndTime
+        mouseRelativePosition = 0
+        
+        initialCoords = {
+            x : 0
+        }
 
-    currentCoords = {
-        x : 0
-    }
+        currentCoords = {
+            x : 0
+        }
 
     // Animation variables---------------------------
 
