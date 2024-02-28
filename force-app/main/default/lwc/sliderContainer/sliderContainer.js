@@ -20,7 +20,7 @@ const HEIGHT_UNIT = 'px'
 export default class SliderContainer extends LightningElement {
 
     // Store here all data about slides (img.src or other info)
-    allAvailableContent = [ IMAGE_1, IMAGE_2, IMAGE_3, IMAGE_4, IMAGE_5, IMAGE_6, IMAGE_7, IMAGE_8, IMAGE_9, IMAGE_10 ]
+    @api allAvailableContent = [ IMAGE_1, IMAGE_2, IMAGE_3, IMAGE_4, IMAGE_5, IMAGE_6, IMAGE_7, IMAGE_8, IMAGE_9, IMAGE_10 ]
 
     // Here we store currently displayed slides that we take from this.allAvailableContent
     @track currentlyDisplayedContent = []
@@ -32,8 +32,8 @@ export default class SliderContainer extends LightningElement {
         // If true then slider is infinite
         infiniteSlider = true
 
-        // If false then you can move slider with the mouse or trackpad
-        @api disableMouseMove = false
+        // If true then you can move slider with the mouse or trackpad
+        enableMouseMove = true
 
         // Slider width in UNIT
         @api sliderContainerWidth = 100
@@ -42,10 +42,11 @@ export default class SliderContainer extends LightningElement {
         @api sliderContainerHeight = 300
 
         // Number of visible slides in frame
-        @api amountOfSlidesInFrame = 3
+        @api amountOfSlidesInFrame = 4
 
         // Amount of scrolled slides per one slide. 
         // (amountOfSlidesInFrame + amountOfSlidesPerSlide*2) must not be greater than allAvailableContent.length
+        // amountOfSlidesPerSlide must not be greater than amountOfSlidesInFrame
         @api amountOfSlidesPerSlide = 2
 
         // Scroll speed in ms
@@ -68,7 +69,6 @@ export default class SliderContainer extends LightningElement {
 
     // Animation variables---------------------------
 
-        showSlider = false
         mouseClickedOnTheElement = false
         firstRender = true
         slideSwitcher = true
@@ -102,7 +102,7 @@ export default class SliderContainer extends LightningElement {
             this.firstRender = false
             this.wrapper = this.template.querySelector('.wrapper')
             this.wrapper.style.width = this.sliderContainerWidth + UNIT
-            if (!this.disableMouseMove) {
+            if (this.enableMouseMove) {
                 this.wrapper.addEventListener('mousedown', this.handleMouseDown.bind(this))
                 this.wrapper.addEventListener('mousemove', this.handleMouseMove.bind(this))
                 this.wrapper.addEventListener('mouseup', this.handleMouseUp.bind(this))
@@ -173,7 +173,7 @@ export default class SliderContainer extends LightningElement {
     slidePrev() {
         if (this.slideSwitcher) {
             if (this.infiniteSlider) {
-                this.changeFirstSlideStyle(-this.imgWidth * (2 * this.amountOfSlidesPerSlide) + UNIT)
+                this.changeFirstSlideStyle(-this.imgWidth * (this.amountOfSlidesPerSlide * 2) + UNIT)
                 setTimeout(() => {
                     for (let i = 0; i < this.amountOfSlidesPerSlide; i++) {
                         if (this.indexPrev > this.allAvailableContent.length - 1) this.indexPrev = 0
@@ -250,13 +250,11 @@ export default class SliderContainer extends LightningElement {
     handleMouseMove(event) {
         event.preventDefault();
         event.stopPropagation();
-        if (this.slideSwitcher) {
-            if (this.mouseClickedOnTheElement) {
-                this.currentCoords.x = event.pageX
-                this.mouseRelativePosition = parseInt(this.currentCoords.x) - parseInt(this.initialCoords.x)
-                const renderedItems = this.template.querySelectorAll('.slide-container')
-                renderedItems[0].style.marginLeft = (parseInt(this.marginLeft) + this.mouseRelativePosition) + 'px'
-            }
+        if (this.slideSwitcher && this.mouseClickedOnTheElement) {
+            this.currentCoords.x = event.pageX
+            this.mouseRelativePosition = parseInt(this.currentCoords.x) - parseInt(this.initialCoords.x)
+            const renderedItems = this.template.querySelectorAll('.slide-container')
+            renderedItems[0].style.marginLeft = (parseInt(this.marginLeft) + this.mouseRelativePosition) + 'px'
         }
     }
 
@@ -278,16 +276,16 @@ export default class SliderContainer extends LightningElement {
     }
 
     handleSlide(callback) {
-        if (Math.abs(this.mouseRelativePosition) > 10 && Math.abs(this.mouseRelativePosition) > Math.abs(parseInt(this.marginLeft)/2)) {
+        if (Math.abs(this.mouseRelativePosition) > 10 && 
+            (Math.abs(this.mouseRelativePosition) > Math.abs(parseInt(this.marginLeft)/2) ||
+            this.touchEndTime - this.touchStartTime < 200)
+            ) {
+
             callback.call(this)
         } else {
-            if (Math.abs(this.mouseRelativePosition) > 10 && this.touchEndTime - this.touchStartTime < 200) {
-                callback.call(this)
-            } else {
-                const renderedItems = this.template.querySelectorAll('.slide-container')
-                renderedItems[0].style.transition = this.speed + 'ms'
-                renderedItems[0].style.marginLeft = parseInt(this.marginLeft) + 'px'
-            }
+            const renderedItems = this.template.querySelectorAll('.slide-container')
+            renderedItems[0].style.transition = this.speed + 'ms'
+            renderedItems[0].style.marginLeft = parseInt(this.marginLeft) + 'px'
         }
     }
 
