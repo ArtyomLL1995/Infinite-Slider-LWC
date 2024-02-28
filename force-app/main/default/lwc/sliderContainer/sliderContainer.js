@@ -114,7 +114,9 @@ export default class SliderContainer extends LightningElement {
     defineInitialDisplayedContent() {
         let index = this.infiniteSlider ? this.indexNext : 0
         for (let i = 0; i < this.numberOfInitialDrownSlides; i++) {
-            if (index === this.allAvailableContent.length) index = 0
+            if (index === this.allAvailableContent.length) {
+                index = 0
+            } 
             this.currentlyDisplayedContent.push({src : this.allAvailableContent[index]})
             index++
         }
@@ -131,6 +133,7 @@ export default class SliderContainer extends LightningElement {
         this.indexPrev = this.amountOfSlidesInFrame + this.amountOfSlidesPerSlide
     }
 
+    // Since all slide elems inside slider are inline-block we need to change just margin of the first one
     changeFirstSlideStyle(left) {
         this.slideSwitcher = false
         const renderedItems = this.template.querySelectorAll('.slide-container')
