@@ -45,8 +45,6 @@ export default class SliderContainer extends LightningElement {
         @api amountOfSlidesInFrame = 4
 
         // Amount of scrolled slides per one slide. 
-        // (amountOfSlidesInFrame + amountOfSlidesPerSlide*2) must not be greater than allAvailableContent.length
-        // amountOfSlidesPerSlide must not be greater than amountOfSlidesInFrame
         @api amountOfSlidesPerSlide = 2
 
         // Scroll speed in ms
