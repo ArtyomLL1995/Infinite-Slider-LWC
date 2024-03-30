@@ -1,6 +1,6 @@
 Endless scroll component written on LWC for Salesforce platform. 
 
-Highly and easily customizible. 
+Easily customizible. 
 
 You can change the size of the container, the amount of slides in the container, the amount of slides scrolled at a time, the speed.
 
