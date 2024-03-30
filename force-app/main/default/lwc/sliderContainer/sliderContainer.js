@@ -275,10 +275,9 @@ export default class SliderContainer extends LightningElement {
 
     handleSlide(callback) {
         if (Math.abs(this.mouseRelativePosition) > 10 && 
-            (Math.abs(this.mouseRelativePosition) > Math.abs(parseInt(this.marginLeft)/2) ||
-            this.touchEndTime - this.touchStartTime < 200)
-            ) {
-
+            (Math.abs(this.mouseRelativePosition) > Math.abs(parseInt(this.marginLeft)/2) || this.touchEndTime - this.touchStartTime < 200)
+            ) 
+        {
             callback.call(this)
         } else {
             const renderedItems = this.template.querySelectorAll('.slide-container')
