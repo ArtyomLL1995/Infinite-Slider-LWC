@@ -1,9 +1,9 @@
-Endless scroll component written on LWC for Salesforce platform. 
+### Endless scroll component written on LWC for Salesforce platform. 
 
-Easily customizible. 
+* Easily customizible. 
 
-You can change the size of the container, the amount of slides in the container, the amount of slides scrolled at a time, the speed.
+* You can change the size of the container, the amount of slides in the container, the amount of slides scrolled at a time, the speed.
 
-Supports mouse scroll and touch scroll.
+* Supports mouse scroll and touch scroll.
 
-You can put any HTML content in each slide (images, videos, your own custom LWC components and HTML).
+* You can put any HTML content in each slide (images, videos, your own custom LWC components and HTML).
