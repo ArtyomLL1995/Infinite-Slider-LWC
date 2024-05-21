@@ -1,0 +1,19 @@
+.product-text {
+    text-wrap: wrap; 
+    text-align: center; 
+    text-transform: uppercase;
+    margin-top: 10px;
+}
+
+.product-container {
+    position: absolute; 
+    top: 5px; 
+    bottom: 5px; 
+    left: 5px; 
+    right: 5px; 
+    border: 1px solid lightgrey; 
+    border-radius:5px;
+    display:flex;
+    flex-direction:column;
+    justify-content: space-between;
+}
