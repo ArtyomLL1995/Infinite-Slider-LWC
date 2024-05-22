@@ -1,7 +1,9 @@
 <template>
-    <div class="wrapper" ontouchstart={handleMouseDown} ontouchend={handleMouseUp} ontouchmove={handleMouseMove}>
-        <div class="slide-container" for:each={currentlyDisplayedContent} for:item="item" key={item.Id}>
-            <c-product-card-container product-name={item.Name} product-code={item.Code}></c-product-card-container> 
+    <div class="outer-wrapper">
+        <div class="wrapper" ontouchstart={handleMouseDown} ontouchend={handleMouseUp} ontouchmove={handleMouseMove}>
+            <div class="slide-container" for:each={currentlyDisplayedContent} for:item="item" key={item.Key}>
+                <c-product-card-container product-name={item.Name} product-code={item.Code}></c-product-card-container> 
+            </div>
         </div>
         <lightning-icon icon-name="utility:right" class="next" onclick={slidePrev}></lightning-icon>
         <lightning-icon icon-name="utility:left" class="prev" onclick={slideNext}></lightning-icon>

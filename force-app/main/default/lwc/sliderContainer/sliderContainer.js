@@ -69,12 +69,11 @@ export default class SliderContainer extends LightningElement {
 
     // Animation variables---------------------------
 
-    currentlyScrolledSlides = 0
-
     async connectedCallback() {
         this.allAvailableContent = await getProducts()
         this.applyInitialVariables()
         this.defineInitialDisplayedContent()
+        this.dispatchTotalPages()
     }
 
     renderedCallback() {
@@ -93,20 +92,30 @@ export default class SliderContainer extends LightningElement {
     }
 
     defineInitialDisplayedContent() {
-        let index = this.infiniteSlider ? this.indexNext : 0
+        let index = this.indexNext
         this.currentlyDisplayedContent = []
-        for (let i = 0; i < this.numberOfInitialDrownSlides; i++) {
-            if (index === this.allAvailableContent.length) {
-                index = 0
-            } 
-            this.currentlyDisplayedContent.push(this.createDisplayObj(index))
-            index++
+        if (this.allAvailableContent.length > this.amountOfSlidesInFrame) {
+            for (let i = 0; i < this.numberOfInitialDrownSlides; i++) {
+                if (this.infiniteSlider) {
+                    if (index === this.allAvailableContent.length) index = 0
+                    this.currentlyDisplayedContent.push(this.createDisplayObj(index))
+                    index++
+                } else {
+                    if (this.allAvailableContent[i]) {
+                        this.currentlyDisplayedContent.push(this.createDisplayObj(i))
+                    }
+                }
+            }
+        } else {
+            for (let i = 0; i < this.allAvailableContent.length; i++) {
+                this.currentlyDisplayedContent.push(this.createDisplayObj(i))
+            }
         }
     }
 
     createDisplayObj(index) {
         return {
-            Id : this.allAvailableContent[index].Id, 
+            Key: Date.now() * Math.random(), 
             Name : this.allAvailableContent[index].Name,
             Code: this.allAvailableContent[index].ProductCode
         }
@@ -133,7 +142,7 @@ export default class SliderContainer extends LightningElement {
     }
 
     slideNext() {
-        if (this.slideSwitcher) {
+        if (this.slideSwitcher && this.allAvailableContent.length > this.amountOfSlidesInFrame) {
             if (this.infiniteSlider) {
                 this.changeFirstSlideStyle(0 + this.widthUnit)
                 setTimeout(() => {
@@ -145,6 +154,7 @@ export default class SliderContainer extends LightningElement {
                         this.currentlyDisplayedContent.unshift(this.createDisplayObj(this.indexNext))
                         this.currentlyDisplayedContent.pop()
                     }
+                    this.dispatchCurrentPage()
                 }, this.speed)
             } else {
                 if (Math.floor(this.marginLeftOffset) < 0) {
@@ -154,6 +164,7 @@ export default class SliderContainer extends LightningElement {
                     this.changeFirstSlideStyle(0 + this.widthUnit)
                 }
                 setTimeout(() => {
+                    this.dispatchCurrentPage()
                     this.slideSwitcher = true
                 }, this.speed)
             }
@@ -161,24 +172,20 @@ export default class SliderContainer extends LightningElement {
     }
 
     slidePrev() {
-        if (this.slideSwitcher) {
+        if (this.slideSwitcher && this.allAvailableContent.length > this.amountOfSlidesInFrame) {
             if (this.infiniteSlider) {
                 this.changeFirstSlideStyle(-this.imgWidth * (this.amountOfSlidesPerSlide * 2) + this.widthUnit)
                 setTimeout(() => {
                     for (let i = 0; i < this.amountOfSlidesPerSlide; i++) {
-                        if (this.indexPrev > this.allAvailableContent.length - 1) this.indexPrev = 0
-                        if (this.indexNext > this.allAvailableContent.length - 1) this.indexNext = 0
-                        this.currentlyDisplayedContent.push(this.createDisplayObj(this.indexPrev))
+                        if (this.indexPrev > this.allAvailableContent.length-1) this.indexPrev = 0
+                        if (this.indexNext > this.allAvailableContent.length-1) this.indexNext = 0
+                        const newObj = this.createDisplayObj(this.indexPrev)
+                        this.currentlyDisplayedContent.push(newObj)
                         this.currentlyDisplayedContent.shift()
                         this.indexPrev += 1
                         this.indexNext += 1
                     }
-
-                    if (this.currentlyScrolledSlides < this.allAvailableContent.length) {
-                        this.currentlyScrolledSlides += this.amountOfSlidesPerSlide
-                    } else {
-                        this.currentlyScrolledSlides = 0
-                    }
+                    this.dispatchCurrentPage()
                 }, this.speed)
             } else {
                 if (
@@ -200,6 +207,7 @@ export default class SliderContainer extends LightningElement {
                         }
                         this.currentlyDisplayedContent = [...this.currentlyDisplayedContent, ...newSlides]
                         this.slideSwitcher = true
+                        this.dispatchCurrentPage()
                     }, this.speed)
                 } else {
                     this.changeFirstSlideStyle(this.marginLeftOffset + this.widthUnit)
@@ -219,9 +227,11 @@ export default class SliderContainer extends LightningElement {
             renderedItems[i].style.transition = 0 + 's'
             if (this.infiniteSlider) {
                 if (i === 0) {
-                    renderedItems[i].style.marginLeft = -this.imgWidth * this.amountOfSlidesPerSlide + this.widthUnit
-                } else {
-                    renderedItems[i].style.marginLeft = 0 + this.widthUnit
+                    if (this.allAvailableContent.length > this.amountOfSlidesInFrame) {
+                        renderedItems[i].style.marginLeft = -this.imgWidth * this.amountOfSlidesPerSlide + this.widthUnit
+                    } else {
+                        renderedItems[i].style.marginLeft = 0 + this.widthUnit
+                    }
                 }
             }
         }
@@ -271,12 +281,9 @@ export default class SliderContainer extends LightningElement {
     }
 
     handleSlide(callback) {
-        if (
-            Math.abs(this.mouseRelativePosition) > 10 && 
-            (
-                Math.abs(this.mouseRelativePosition) > Math.abs(parseInt(this.marginLeft)/2) || 
-                this.touchEndTime - this.touchStartTime < 200
-            )
+        if (Math.abs(this.mouseRelativePosition) > 10 && 
+            (Math.abs(this.mouseRelativePosition) > Math.abs(parseInt(this.marginLeft)/2) || this.touchEndTime - this.touchStartTime < 200) && 
+            this.allAvailableContent.length > this.amountOfSlidesInFrame
         ) 
         {
             callback.call(this)
