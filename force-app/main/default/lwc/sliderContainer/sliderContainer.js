@@ -266,17 +266,15 @@ export default class SliderContainer extends LightningElement {
     handleMouseUp(event) {
         event.preventDefault();
         event.stopPropagation();
-        if (this.slideSwitcher) {
+        if (this.slideSwitcher && this.mouseClickedOnTheElement) {
             this.touchEndTime = Date.parse(new Date)
-            if (this.mouseClickedOnTheElement) {
-                if (this.mouseRelativePosition > 0) {
-                    this.handleSlide(this.slideNext)
-                } else {
-                    this.handleSlide(this.slidePrev)
-                }
-                this.mouseRelativePosition = 0
-                this.mouseClickedOnTheElement = false
-            } 
+            if (this.mouseRelativePosition > 0) {
+                this.handleSlide(this.slideNext)
+            } else {
+                this.handleSlide(this.slidePrev)
+            }
+            this.mouseRelativePosition = 0
+            this.mouseClickedOnTheElement = false 
         }
     }
 
