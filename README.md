@@ -1,4 +1,4 @@
-### Endless scroll component written on LWC for Salesforce platform. 
+### Slider component written on LWC for Salesforce platform. 
 
 * Easily customizible. 
 
