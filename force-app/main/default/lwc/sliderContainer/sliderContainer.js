@@ -73,7 +73,6 @@ export default class SliderContainer extends LightningElement {
         this.allAvailableContent = await getProducts()
         this.applyInitialVariables()
         this.defineInitialDisplayedContent()
-        this.dispatchTotalPages()
     }
 
     renderedCallback() {
@@ -154,7 +153,6 @@ export default class SliderContainer extends LightningElement {
                         this.currentlyDisplayedContent.unshift(this.createDisplayObj(this.indexNext))
                         this.currentlyDisplayedContent.pop()
                     }
-                    this.dispatchCurrentPage()
                 }, this.speed)
             } else {
                 if (Math.floor(this.marginLeftOffset) < 0) {
@@ -164,7 +162,6 @@ export default class SliderContainer extends LightningElement {
                     this.changeFirstSlideStyle(0 + this.widthUnit)
                 }
                 setTimeout(() => {
-                    this.dispatchCurrentPage()
                     this.slideSwitcher = true
                 }, this.speed)
             }
@@ -179,13 +176,11 @@ export default class SliderContainer extends LightningElement {
                     for (let i = 0; i < this.amountOfSlidesPerSlide; i++) {
                         if (this.indexPrev > this.allAvailableContent.length-1) this.indexPrev = 0
                         if (this.indexNext > this.allAvailableContent.length-1) this.indexNext = 0
-                        const newObj = this.createDisplayObj(this.indexPrev)
-                        this.currentlyDisplayedContent.push(newObj)
+                        this.currentlyDisplayedContent.push(this.createDisplayObj(this.indexPrev))
                         this.currentlyDisplayedContent.shift()
                         this.indexPrev += 1
                         this.indexNext += 1
                     }
-                    this.dispatchCurrentPage()
                 }, this.speed)
             } else {
                 if (
@@ -207,7 +202,6 @@ export default class SliderContainer extends LightningElement {
                         }
                         this.currentlyDisplayedContent = [...this.currentlyDisplayedContent, ...newSlides]
                         this.slideSwitcher = true
-                        this.dispatchCurrentPage()
                     }, this.speed)
                 } else {
                     this.changeFirstSlideStyle(this.marginLeftOffset + this.widthUnit)
