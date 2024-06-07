@@ -7,3 +7,5 @@
 * Supports mouse scroll and touch scroll.
 
 * You can put any HTML content in each slide (images, videos, your own custom LWC components and HTML).
+
+* https://githubsfdeploy.herokuapp.com/app/githubdeploy/ArtyomLL1995/Infinite-Slider-LWC?ref=main
